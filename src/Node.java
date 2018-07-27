@@ -7,12 +7,13 @@ public class Node {
 	private GameState.Action action;
 	private int pathCost;
 	private Node parent;
-	public int f;
+	public double f;
 	public int h;
 	public int g;
+	public int order;
 	
 	public Node(GameState state, GameState.Action action, int pathCost, Node parent) {
-		super();
+		
 		this.state = state;
 		this.action = action;
 		this.pathCost = pathCost;
@@ -66,4 +67,14 @@ public class Node {
 		}
 		return returnNodes;
 	}
+	
+	@Override
+	public boolean equals(Object other) {
+		if(other instanceof Node) {
+			if(((Node) other).getState().equals(this.getState())) return true;
+		}
+		return false;
+	}
+	
+
 }

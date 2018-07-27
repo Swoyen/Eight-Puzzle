@@ -11,6 +11,7 @@ public class GameState {
 	
 	public GameState(String[] tiles) {
 		this(Arrays.asList(tiles));
+		
 	}
 	
 	public GameState(List<String> tiles) {
@@ -96,6 +97,18 @@ public class GameState {
 				}
 			}
 		}
+		return h;
+	}
+	
+	public int heuristic2() {
+		int h=0;
+		for(int i=0;i<9;i++) {
+			if(tiles.get(i).equals(" ")) continue;
+			if(!tiles.get(i).equals(i+"")) 
+				h+= Math.abs(Integer.parseInt(tiles.get(i))-(i+1)) ;
+		}
+
+		System.out.println(h);
 		return h;
 	}
 }

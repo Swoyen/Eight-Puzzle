@@ -1,4 +1,13 @@
 import java.util.Scanner;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.RunnableFuture;
 
 public class EightPuzzle {
 
@@ -6,7 +15,7 @@ public class EightPuzzle {
 		EightPuzzle puzzle = new EightPuzzle();
 		puzzle.solve();
 	}
-	
+
 	/* Some example game states:
 	 * 
 	 * The practical (solution length = 3):	 1 2 3 4 8 5 7 _ 6
@@ -31,7 +40,7 @@ public class EightPuzzle {
 	 * One that is not solvable: 3 2 1 4 5 6 7 8 _
 	 * 
 	 */
-	
+
 	private static String[] readTiles() {
 		int nTiles = GameState.SIZE * GameState.SIZE;
 		System.out.println("Enter initial state (use 1..." + (nTiles-1) + " for tiles and _ for the empty tile, separated by spaces):");
@@ -48,22 +57,56 @@ public class EightPuzzle {
 		}
 		return tiles;
 	}
-	
+
 	private GameState getInitialState() {
-		// return new GameState(new String[]{"1","2","3", "4","8","5", "7", GameState.EMPTY, "6"});
 		return new GameState(readTiles());
 	}
 
 	private void solve() {
 		GameState initialState = getInitialState();
-		
+
 		System.out.println("Searching...");
+
 		AStarSearch seeker = new AStarSearch(initialState);
-		Node result = seeker.search();
-		
+		//	;Node result = seeker.search();
+
+		Callable<Node> run = new Callable<Node>()
+		{
+			@Override
+			public Node call() throws Exception
+			{
+				// your code to be timed
+				return seeker.find();
+			}
+		};
+
+		RunnableFuture future = new FutureTask(run);
+		ExecutorService service = Executors.newSingleThreadExecutor();
+		service.execute(future);
+		Node result = null;
+		try
+		{
+			try {
+				result = (Node) future.get(1, TimeUnit.SECONDS);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ExecutionException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}    
+		}
+		catch (TimeoutException ex)
+		{
+			// timed out. Try to stop the code if possible.
+			future.cancel(true);
+		}
+		service.shutdown();
+
 		if (result == null) System.out.println("NO SOLUTION FOUND");
 		else System.out.println(result);
+
 		System.out.println("Explored " + seeker.getExploredCount() + " states.");
 	}
-	
+
 }
